@@ -29,8 +29,7 @@
 
         function changeDay(offset) {
             var dates = document.getElementById('dates');
-            var newIndex = dates.selectedIndex + offset;
-            console.log(newIndex);
+            var newIndex = dates.selectedIndex + offset;            
             if (newIndex >= 0 && newIndex < dates.length) {
                 dates.selectedIndex = newIndex;
                 drawChart(dates.value);
@@ -42,9 +41,6 @@
 <body>
     <div id="form">
         <form>
-            <script>
-                console.log(this);
-            </script>
             <a href="#" onclick="dayBefore()">fr&uuml;her</a>
             <select id="dates" onchange="drawChart(this.value)">
             </select> <a href="#" onclick="nextDay()">sp&auml;ter</a>
@@ -72,10 +68,7 @@
 
         var div_w = window.getComputedStyle(document.getElementById("graph")).getPropertyValue('width').split('px')[0];
         var div_h = window.getComputedStyle(document.getElementById("graph")).getPropertyValue('height').split('px')[0];
-
-        console.log(div_w);
-        console.log(div_h);
-
+       
         var svg = d3.select("svg"),
             margin = {
                 top: 20,
