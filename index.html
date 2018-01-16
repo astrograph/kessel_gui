@@ -11,7 +11,12 @@
             padding: 20px;
         }
         
-        .legend,
+        .legend {
+            font-size: 17px;
+            letter-spacing: 1px;
+            font-family: "Segoe UI", Arial, sans-serif;           
+        }
+        
         span {
             font-size: 17px;
             letter-spacing: 1px;
@@ -270,7 +275,7 @@
                             return data.color = linecolor;
                         })
                         .text(lineNames[column]);
-                    g.append("path").datum(data).attr("fill", "none").attr("stroke", linecolor).attr("stroke-width", 1.5).attr("d", lines[column++]);
+                    g.append("path").datum(data).attr("fill", "none").attr("stroke", linecolor).attr("stroke-width", 3).attr("d", lines[column++]);
                 });
 
             });
