@@ -11,10 +11,16 @@
             padding: 20px;
         }
         
-        .legend {
+        .legend,
+        span {
             font-size: 17px;
             letter-spacing: 1px;
             font-family: "Segoe UI", Arial, sans-serif;
+            border: 2px solid lightgrey;
+            margin: 10px;
+            background-color: white;
+            padding: 5px;
+            border-radius: 010px;
         }
         
         a {
@@ -23,7 +29,7 @@
             font-family: "Segoe UI", Arial, sans-serif;
         }
     </style>
-
+    <script src="papaparse.min.js"></script>
     <script>
         function nextDay() {
             changeDay(-1);
@@ -35,10 +41,102 @@
 
         function changeDay(offset) {
             var dates = document.getElementById('dates');
-            var newIndex = dates.selectedIndex + offset;            
+            var newIndex = dates.selectedIndex + offset;
             if (newIndex >= 0 && newIndex < dates.length) {
                 dates.selectedIndex = newIndex;
                 drawChart(dates.value);
+            }
+        }
+
+
+
+        Papa.parse("current_data.txt", {
+            download: true,
+            complete: function (results) {
+                var output = parseData(results.data);
+                document.getElementById("currentStatus").innerHTML = "Status: " + output;
+            }
+        });
+
+        function parseData(data) {
+            var status1 = data[2][2].trim();
+            var status2 = data[3][2].trim();
+            var status3 = data[4][2].trim();
+
+            switch (status1) {
+            case "0.0":
+                text1 = "Winterbetrieb";
+                break;
+            case "1.0":
+                text1 = "Sommerbetrieb";
+                break;
+            case "2.0":
+                text1 = "Uebergangsbetrieb";
+                break;
+            case "3.0":
+                text1 = "Scheitholzbetrieb";
+                break;
+            case "4.0":
+                text1 = "Reinigen";
+                break;
+            case "5.0":
+                text1 = "Kaminfeger";
+                break;
+            case "6.0":
+                text1 = "Ausgeschaltet";
+            }
+
+            switch (status2) {
+            case "1.0":
+                text2 = "Brenner aus";
+                break;
+            case "2.0":
+                text2 = "Anheizen";
+                break;
+            case "3.0":
+                text2 = "Heizen";
+                break;
+            case "4.0":
+                text2 = "unknown";
+                break;
+            case "5.0":
+                text2 = "unknown";
+                break;
+            case "6.0":
+                text2 = "unknown";
+                break;
+            case "7.0":
+                text2 = "Vorbereitung";
+                break;
+            case "8.0":
+                text2 = "Vorwaermphase";
+                break;
+            case "9.0":
+                text2 = "Zuenden";
+                break;
+            case "10.0":
+                text2 = "unknown";
+                break;
+            case "11.0":
+                text2 = "Abst. warten 1";
+                break;
+            case "12.0":
+                text2 = "Abst. Einschub 1";
+                break;
+            case "13.0":
+                text2 = "Abst. Warten 2";
+                break;
+            case "14.0":
+                text2 = "Abst. Einschub 2";
+                break;
+            case "15.0":
+                text2 = "Abreinigen";
+            }
+
+            if (status2 === "11.0" && status3 === "7.0") {
+                return text1 + " Fehler! Aschebox voll oder Lagerraum kontrollieren!"
+            } else {
+                return text1 + " " + text2;
             }
         }
     </script>
@@ -47,10 +145,13 @@
 <body>
     <div id="form">
         <form>
+
             <a href="#" onclick="dayBefore()">fr&uuml;her</a>
             <select id="dates" onchange="drawChart(this.value)">
             </select> <a href="#" onclick="nextDay()">sp&auml;ter</a>
+            <span id="currentStatus"></span>
         </form>
+
 
 
     </div>
@@ -74,7 +175,7 @@
 
         var div_w = window.getComputedStyle(document.getElementById("graph")).getPropertyValue('width').split('px')[0];
         var div_h = window.getComputedStyle(document.getElementById("graph")).getPropertyValue('height').split('px')[0];
-       
+
         var svg = d3.select("svg"),
             margin = {
                 top: 20,
