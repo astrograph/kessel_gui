@@ -14,7 +14,13 @@
         .legend {
             font-size: 17px;
             letter-spacing: 1px;
-            font-family: "Segoe UI", Arial, sans-serif;           
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+        
+        .data {
+            font-size: 17px;
+            letter-spacing: 1px;
+            font-family: monospace;
         }
         
         span {
@@ -36,6 +42,12 @@
     </style>
     <script src="papaparse.min.js"></script>
     <script>
+        function pad(num, size) {
+            var s = "000000000" + num;
+            return s.substr(s.length - size);
+        }
+
+
         function nextDay() {
             changeDay(-1);
         }
@@ -50,23 +62,58 @@
             if (newIndex >= 0 && newIndex < dates.length) {
                 dates.selectedIndex = newIndex;
                 drawChart(dates.value);
+                loadData(dates.value);
             }
         }
+        
+         function loadData(fileName) {
+            
+            Papa.parse( fileName, {
+                download: true,
+                complete: function (results) {
+                     document.getElementById("data").innerHTML ="";
+                    var tableData = results.data;
+                    var statusText = parseData(tableData);
+                    document.getElementById("currentStatus").innerHTML = "Status: " + statusText;
 
+                    var lastRelevantStatus = "";
+                     
 
+                    for (i = tableData.length - 2; i >= 0; i--) {
 
-        Papa.parse("current_data.txt", {
-            download: true,
-            complete: function (results) {
-                var output = parseData(results.data);
-                document.getElementById("currentStatus").innerHTML = "Status: " + output;
-            }
-        });
+                        var status1 = tableData[i][2].trim();
+                        var status2 = tableData[i][3].trim();
+                        var status3 = tableData[i][4].trim();
+
+                        var newStatus = status1 + "-" + status2;
+                        if (newStatus != lastRelevantStatus) {
+                            lastRelevantStatus = newStatus;
+                            document.getElementById("data").innerHTML += tableData[i][1] + ": " + convertStatusToString(status1, status2, status3) + "(" + newStatus + "-" + status3 + ")" + "<br/>"
+                        }
+                    }
+                }, error: function(err, file, inputElem, reason) {
+                    document.getElementById("data").innerHTML = "File: " + err;
+                }
+            });
+        }
+
+        var date = new Date();
+        
+        var currentFile = "froeling_data_" + date.getUTCFullYear() + "-" + pad(date.getUTCMonth() + 1, 2) + "-" + pad(date.getUTCDate(), 2)+ ".log";
+
+       loadData(currentFile);
 
         function parseData(data) {
-            var status1 = data[2][2].trim();
-            var status2 = data[3][2].trim();
-            var status3 = data[4][2].trim();
+            var status1 = data[data.length - 2][2].trim();
+            var status2 = data[data.length - 2][3].trim();
+            var status3 = data[data.length - 2][4].trim();
+            return convertStatusToString(status1, status2, status3);
+
+        }
+
+        function convertStatusToString(status1, status2, status3) {
+            var text1 = "";
+            var text2 = "";
 
             switch (status1) {
             case "0.0":
@@ -137,7 +184,8 @@
             case "15.0":
                 text2 = "Abreinigen";
             }
-
+            console.log(text1);
+            console.log(text2);
             if (status2 === "11.0" && status3 === "7.0") {
                 return text1 + " Fehler! Aschebox voll oder Lagerraum kontrollieren!"
             } else {
@@ -165,6 +213,7 @@
 
 
     </div>
+    <div id="data" class="data"></div>
 
     <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
     <script src="https://d3js.org/d3.v4.js"></script>
@@ -215,10 +264,6 @@
 
         var logData = drawChart(date_data);
 
-        function pad(num, size) {
-            var s = "000000000" + num;
-            return s.substr(s.length - size);
-        }
 
         function formatDate(aDate) {
             return aDate.getFullYear() + "-" + pad((aDate.getMonth() + 1), 2) + "-" + pad(aDate.getDate(), 2)
@@ -269,7 +314,7 @@
                     var linecolor = color(column);
                     g.append("text")
                         .attr("x", 30)
-                        .attr("y", 50 + column * 20)
+                        .attr("y", 10 + column * 20)
                         .attr("class", "legend") // style the legend
                         .style("fill", function () { // dynamic colours
                             return data.color = linecolor;
